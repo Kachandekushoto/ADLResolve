@@ -1020,7 +1020,9 @@
   </div>
 </footer>
 <script>
-  const API_URL = 'https://itresolve-backend-production.up.railway.app/api';
+  const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8080/api'
+    : 'https://itresolve-backend-production.up.railway.app/api';
   let adminToken = sessionStorage.getItem('itresolve_admin_token');
   let userToken = sessionStorage.getItem('itresolve_user_token');
   let apiCategories = [];
