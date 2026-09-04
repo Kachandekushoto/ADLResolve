@@ -19,7 +19,11 @@ const configuredOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost,http:/
 	.split(',')
 	.map(origin => origin.trim())
 	.filter(Boolean);
-const allowedOrigins = [...new Set([...configuredOrigins, 'https://adlresolve.netlify.app'])];
+const allowedOrigins = [...new Set([
+	...configuredOrigins,
+	'https://adlresolve.netlify.app',
+	'https://adlresolve.pages.dev'
+])];
 const allowAnyOrigin = allowedOrigins.includes('*');
 
 app.use(helmet());
