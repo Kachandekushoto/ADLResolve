@@ -20,11 +20,12 @@ const configuredOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost,http:/
 	.map(origin => origin.trim())
 	.filter(Boolean);
 const allowedOrigins = [...new Set([...configuredOrigins, 'https://adlresolve.netlify.app'])];
+const allowAnyOrigin = allowedOrigins.includes('*');
 
 app.use(helmet());
 app.use(cors({
 	origin(origin, callback) {
-		if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+		if (!origin || allowAnyOrigin || allowedOrigins.includes(origin)) return callback(null, true);
 		return callback(new Error('Origin is not allowed by CORS.'));
 	}
 }));
