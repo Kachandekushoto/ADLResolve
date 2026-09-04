@@ -1,0 +1,7 @@
+node_modules/
+composer.phar
+.env
+vendor/
+uploads/*
+!uploads/.gitkeep
+npm-debug.log

@@ -1,0 +1,1906 @@
+<?php
+$pageTitle = 'ITResolve — Diagnose. Troubleshoot. Resolve.';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#0a0e17;
+    --bg-panel:#111a2b;
+    --bg-panel-2:#172236;
+    --bg-raise:#1c2942;
+    --line:#253352;
+    --line-soft:#1a2439;
+    --accent:#4c8dff;
+    --accent-2:#7fb3ff;
+    --accent-dim:rgba(76,141,255,.14);
+    --text:#f2f5fa;
+    --text-muted:#8b96ad;
+    --text-faint:#5c667e;
+    --good:#34d399;
+    --good-dim:rgba(52,211,153,.14);
+    --warn:#fbbf24;
+    --warn-dim:rgba(251,191,36,.14);
+    --danger:#f87171;
+    --danger-dim:rgba(248,113,113,.14);
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg-void);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:'';
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(76,141,255,.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(76,141,255,.08), transparent 55%);
+    pointer-events:none; z-index:0;
+  }
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer;}
+  input, select, textarea{font-family:inherit;}
+  ::selection{background:var(--accent); color:#fff;}
+  :focus-visible{outline:2px solid var(--accent-2); outline-offset:2px;}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,14,23,.85);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav-inner{
+    max-width:1180px; margin:0 auto; padding:0 28px;
+    height:68px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:-.01em;}
+  .brand-mark{width:34px; height:34px; flex-shrink:0;}
+  .brand-name b{color:var(--accent-2);}
+  .nav-links{display:flex; align-items:center; gap:30px;}
+  .nav-links a{font-size:14px; color:var(--text-muted); font-weight:500; transition:color .15s;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--accent-2);}
+  .nav-cta{display:flex; align-items:center; gap:14px;}
+  @media (max-width:860px){ .nav-links{display:none;} }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 22px; border-radius:9px; font-size:14.5px; font-weight:600;
+    border:1px solid transparent; transition:transform .15s, box-shadow .15s, background .15s, border-color .15s;
+    white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:linear-gradient(180deg,var(--accent-2),var(--accent)); color:#04070f; box-shadow:0 0 0 1px rgba(76,141,255,.3), 0 8px 24px -8px rgba(76,141,255,.6);}
+  .btn-primary:hover{box-shadow:0 0 0 1px rgba(127,179,255,.5), 0 10px 30px -6px rgba(76,141,255,.75);}
+  .btn-secondary{background:var(--bg-panel-2); color:var(--text); border-color:var(--line);}
+  .btn-secondary:hover{border-color:var(--accent); background:var(--bg-raise);}
+  .btn-ghost{background:transparent; color:var(--text-muted); border-color:var(--line);}
+  .btn-ghost:hover{color:var(--text); border-color:var(--accent);}
+  .btn-block{width:100%;}
+  .btn-sm{padding:8px 14px; font-size:13px;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:76px 0 60px; position:relative; z-index:1;}
+  .hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center;}
+  @media (max-width:920px){ .hero-grid{grid-template-columns:1fr;} }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent-2); background:var(--accent-dim); border:1px solid rgba(76,141,255,.3);
+    padding:6px 12px; border-radius:100px; margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--good); box-shadow:0 0 8px var(--good); animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  h1.hero-h{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(34px,4.6vw,54px);
+    line-height:1.06; letter-spacing:-.02em; margin-bottom:20px;
+  }
+  h1.hero-h .accent-line{
+    display:block; background:linear-gradient(90deg,var(--accent-2),var(--accent) 70%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{color:var(--text-muted); font-size:16.5px; max-width:480px; margin-bottom:32px;}
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
+
+  /* Signature: diagnostic scan panel */
+  .scan-panel{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:14px;
+    overflow:hidden; box-shadow:0 20px 60px -20px rgba(0,0,0,.6);
+  }
+  .scan-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; border-bottom:1px solid var(--line-soft); background:var(--bg-panel-2);
+  }
+  .scan-dots{display:flex; gap:6px;}
+  .scan-dots span{width:9px; height:9px; border-radius:50%; background:var(--line);}
+  .scan-title{font-family:var(--font-mono); font-size:11.5px; color:var(--text-faint); letter-spacing:.04em;}
+  .scan-body{padding:22px 20px 24px; font-family:var(--font-mono); font-size:13.5px;}
+  .scan-line{color:var(--text-faint); margin-bottom:10px;}
+  .scan-line b{color:var(--text-muted); font-weight:500;}
+  .scan-readout{
+    display:flex; align-items:center; gap:10px; margin:16px 0 18px;
+    padding:14px 16px; background:var(--accent-dim); border:1px solid rgba(76,141,255,.28); border-radius:9px;
+  }
+  .scan-readout .spinner{width:14px; height:14px; border-radius:50%; border:2px solid rgba(127,179,255,.3); border-top-color:var(--accent-2); animation:spin 0.9s linear infinite; flex-shrink:0;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #scanTarget{color:var(--accent-2); font-weight:600;}
+  .cursor{display:inline-block; width:7px; height:14px; background:var(--accent-2); margin-left:2px; animation:blink 1s step-start infinite; vertical-align:-2px;}
+  @keyframes blink{50%{opacity:0;}}
+  .scan-meta{display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-faint); padding-top:14px; border-top:1px solid var(--line-soft);}
+  .scan-meta .ok{color:var(--good);}
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:78px 0; position:relative; z-index:1;}
+  .section-head{max-width:600px; margin-bottom:44px;}
+  .section-tag{font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-2); margin-bottom:12px;}
+  .section-title{font-family:var(--font-display); font-size:clamp(24px,3vw,32px); font-weight:700; letter-spacing:-.015em; margin-bottom:12px;}
+  .section-desc{color:var(--text-muted); font-size:15.5px;}
+
+  /* ---------- CATEGORY CARDS ---------- */
+  .cat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  @media (max-width:920px){ .cat-grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:560px){ .cat-grid{grid-template-columns:1fr;} }
+  .cat-card{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:26px 22px;
+    display:flex; flex-direction:column; gap:14px; text-align:left; width:100%;
+    transition:border-color .2s, transform .2s, background .2s;
+    position:relative; overflow:hidden;
+  }
+  .cat-card:hover{border-color:var(--accent); transform:translateY(-3px); background:var(--bg-panel-2);}
+  .cat-card:hover .cat-arrow{transform:translateX(3px); color:var(--accent-2);}
+  .cat-icon{
+    width:42px; height:42px; border-radius:10px; background:var(--accent-dim); border:1px solid rgba(76,141,255,.25);
+    display:flex; align-items:center; justify-content:center; color:var(--accent-2);
+  }
+  .cat-name{font-family:var(--font-display); font-weight:600; font-size:16.5px;}
+  .cat-desc{color:var(--text-muted); font-size:13.5px; line-height:1.55; flex-grow:1;}
+  .cat-arrow{font-family:var(--font-mono); font-size:13px; color:var(--text-faint); transition:transform .2s, color .2s;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{position:relative;}
+  .steps-line{position:absolute; top:26px; left:0; right:0; height:1px; background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px); z-index:0;}
+  @media (max-width:860px){ .steps-line{display:none;} }
+  .steps-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:24px; position:relative; z-index:1;}
+  @media (max-width:860px){ .steps-grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:560px){ .steps-grid{grid-template-columns:1fr;} }
+  .step{display:flex; flex-direction:column; gap:14px;}
+  .step-num{
+    font-family:var(--font-mono); font-size:13px; color:var(--accent-2); background:var(--bg-void);
+    border:1px solid var(--accent); width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-weight:600;
+  }
+  .step-title{font-family:var(--font-display); font-weight:600; font-size:16px;}
+  .step-desc{color:var(--text-muted); font-size:13.5px;}
+
+  /* ---------- KB PREVIEW ---------- */
+  .kb-search{
+    display:flex; gap:10px; background:var(--bg-panel); border:1px solid var(--line); border-radius:11px;
+    padding:6px; margin-bottom:26px;
+  }
+  .kb-search input{flex:1; background:transparent; border:none; color:var(--text); padding:12px 14px; font-size:14.5px;}
+  .kb-search input::placeholder{color:var(--text-faint);}
+  .kb-list{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:760px){ .kb-list{grid-template-columns:1fr;} }
+  .kb-item{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:11px; padding:16px 18px;
+    transition:border-color .15s, background .15s;
+  }
+  .kb-item:hover{border-color:var(--accent); background:var(--bg-panel-2);}
+  .kb-item-title{font-size:14px; font-weight:500;}
+  .kb-tag{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.03em; color:var(--accent-2); background:var(--accent-dim); padding:3px 8px; border-radius:5px; white-space:nowrap; margin-top:6px; display:inline-block;}
+  .kb-empty{color:var(--text-faint); font-size:14px; padding:30px 0; text-align:center;}
+
+  /* ---------- FORM ---------- */
+  .page-head{padding:52px 0 8px; position:relative; z-index:1;}
+  .page-head .section-tag{margin-bottom:10px;}
+  .form-shell{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:16px; padding:36px;
+    max-width:760px; margin:0 auto;
+  }
+  @media (max-width:600px){ .form-shell{padding:24px 18px;} }
+  .form-row{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px;}
+  @media (max-width:600px){ .form-row{grid-template-columns:1fr;} }
+  .field{display:flex; flex-direction:column; gap:7px; margin-bottom:18px;}
+  .field label{font-size:13px; font-weight:600; color:var(--text-muted);}
+  .field .hint{font-size:11.5px; color:var(--text-faint); font-weight:400;}
+  .field input[type=text], .field input[type=date], .field select, .field textarea{
+    background:var(--bg-void); border:1px solid var(--line); border-radius:9px; padding:11px 13px;
+    color:var(--text); font-size:14px; transition:border-color .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--accent); outline:none;}
+  .field textarea{resize:vertical; min-height:90px;}
+  .field-error{border-color:var(--danger) !important;}
+  .error-msg{color:var(--danger); font-size:12px; display:none;}
+  .field-invalid .error-msg{display:block;}
+  .upload-box{
+    border:1.5px dashed var(--line); border-radius:10px; padding:22px; text-align:center;
+    color:var(--text-faint); font-size:13px; cursor:pointer; transition:border-color .15s, color .15s;
+  }
+  .upload-box:hover{border-color:var(--accent); color:var(--text-muted);}
+  .support-options{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+  @media (max-width:600px){ .support-options{grid-template-columns:1fr;} }
+  .support-opt{
+    border:1px solid var(--line); border-radius:10px; padding:14px; cursor:pointer;
+    display:flex; flex-direction:column; gap:4px; transition:border-color .15s, background .15s;
+  }
+  .support-opt input{margin-right:8px;}
+  .support-opt.checked{border-color:var(--accent); background:var(--accent-dim);}
+  .support-opt-title{font-size:13.5px; font-weight:600;}
+  .support-opt-desc{font-size:11.5px; color:var(--text-faint);}
+  .form-footer{display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:14px; flex-wrap:wrap;}
+  .form-note{font-size:12px; color:var(--text-faint);}
+  fieldset{border:none; padding:0; margin:0 0 26px;}
+  legend{font-family:var(--font-display); font-weight:600; font-size:15px; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--line-soft); width:100%;}
+
+  /* success panel */
+  .success-panel{max-width:560px; margin:0 auto; text-align:center; background:var(--bg-panel); border:1px solid var(--good); border-radius:16px; padding:44px 32px;}
+  .success-icon{width:56px; height:56px; margin:0 auto 20px; border-radius:50%; background:var(--good-dim); border:1px solid var(--good); display:flex; align-items:center; justify-content:center; color:var(--good);}
+  .ticket-id{font-family:var(--font-mono); font-size:22px; font-weight:600; color:var(--accent-2); background:var(--accent-dim); border:1px solid rgba(76,141,255,.3); padding:12px 20px; border-radius:9px; display:inline-block; margin:18px 0;}
+  .success-status{font-family:var(--font-mono); font-size:12px; color:var(--good); background:var(--good-dim); border:1px solid rgba(52,211,153,.35); padding:5px 12px; border-radius:100px; display:inline-flex; align-items:center; gap:6px;}
+
+  /* ---------- TICKETS ---------- */
+  .ticket-list{display:flex; flex-direction:column; gap:12px;}
+  .ticket-row{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    cursor:pointer; transition:border-color .15s;
+  }
+  .ticket-row:hover{border-color:var(--accent);}
+  .ticket-left{display:flex; align-items:center; gap:16px;}
+  .ticket-id-sm{font-family:var(--font-mono); font-size:13px; color:var(--accent-2); background:var(--accent-dim); padding:5px 10px; border-radius:6px; white-space:nowrap;}
+  .ticket-title{font-weight:500; font-size:14.5px;}
+  .ticket-meta{font-size:12px; color:var(--text-faint); margin-top:3px;}
+  .status-badge{font-family:var(--font-mono); font-size:11px; padding:5px 11px; border-radius:100px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap;}
+  .status-badge .dot{width:6px; height:6px; border-radius:50%;}
+  .status-open{background:var(--accent-dim); color:var(--accent-2); border:1px solid rgba(76,141,255,.3);}
+  .status-open .dot{background:var(--accent-2);}
+  .status-progress{background:var(--warn-dim); color:var(--warn); border:1px solid rgba(251,191,36,.3);}
+  .status-progress .dot{background:var(--warn);}
+  .status-resolved{background:var(--good-dim); color:var(--good); border:1px solid rgba(52,211,153,.3);}
+  .status-resolved .dot{background:var(--good);}
+  .empty-state{
+    text-align:center; padding:60px 20px; background:var(--bg-panel); border:1px dashed var(--line); border-radius:14px;
+  }
+  .empty-state p{color:var(--text-faint); margin-bottom:20px; font-size:14px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{border-top:1px solid var(--line-soft); padding:52px 0 30px; position:relative; z-index:1;}
+  .footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:36px; margin-bottom:40px;}
+  @media (max-width:760px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+  .footer-tagline{color:var(--text-faint); font-size:13px; margin-top:12px; max-width:240px;}
+  .footer-col h4{font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); margin-bottom:14px; font-family:var(--font-mono); font-weight:500;}
+  .footer-col a{display:block; color:var(--text-muted); font-size:13.5px; margin-bottom:10px; transition:color .15s;}
+  .footer-col a:hover{color:var(--accent-2);}
+  .footer-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:26px; border-top:1px solid var(--line-soft); font-size:12px; color:var(--text-faint); flex-wrap:wrap; gap:10px;}
+
+  /* ---------- ADMIN DASHBOARD ---------- */
+  .admin-shell{padding:36px 0 90px; position:relative; z-index:1;}
+  .admin-topbar{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; margin-bottom:28px;}
+  .admin-title{font-family:var(--font-display); font-size:26px; font-weight:700; letter-spacing:-.015em;}
+  .admin-sub{color:var(--text-faint); font-size:13.5px; margin-top:4px;}
+  .admin-whoami{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-muted); background:var(--bg-panel); border:1px solid var(--line); padding:9px 14px; border-radius:100px;}
+  .admin-whoami .avatar{width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg,var(--accent-2),var(--accent)); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:10.5px; font-weight:700; color:#04070f;}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px;}
+  @media (max-width:860px){ .stat-grid{grid-template-columns:1fr 1fr;} }
+  .stat-card{background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px;}
+  .stat-num{font-family:var(--font-mono); font-size:26px; font-weight:600;}
+  .stat-label{font-size:12px; color:var(--text-faint); margin-top:4px; text-transform:uppercase; letter-spacing:.05em;}
+  .stat-card.accent-open .stat-num{color:var(--accent-2);}
+  .stat-card.accent-progress .stat-num{color:var(--warn);}
+  .stat-card.accent-resolved .stat-num{color:var(--good);}
+
+  .admin-tabs{display:flex; gap:6px; margin-bottom:22px; border-bottom:1px solid var(--line-soft);}
+  .admin-tab{padding:11px 18px; font-size:13.5px; font-weight:600; color:var(--text-faint); border-bottom:2px solid transparent; transition:color .15s, border-color .15s;}
+  .admin-tab.active{color:var(--accent-2); border-color:var(--accent);}
+
+  .admin-toolbar{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px;}
+  .admin-toolbar input, .admin-toolbar select{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:9px; padding:10px 13px; color:var(--text); font-size:13.5px;
+  }
+  .admin-toolbar input{flex:1; min-width:200px;}
+  .admin-toolbar input:focus, .admin-toolbar select:focus{border-color:var(--accent); outline:none;}
+
+  .admin-table-wrap{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  table.admin-table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  table.admin-table th{
+    text-align:left; font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--text-faint); font-weight:500; padding:13px 16px; border-bottom:1px solid var(--line-soft); background:var(--bg-panel-2);
+  }
+  table.admin-table td{padding:14px 16px; border-bottom:1px solid var(--line-soft); vertical-align:middle;}
+  table.admin-table tr:last-child td{border-bottom:none;}
+  table.admin-table tr.admin-row:hover{background:var(--bg-panel-2);}
+  .row-ticket-id{font-family:var(--font-mono); font-size:12px; color:var(--accent-2);}
+  .row-title{font-weight:500;}
+  .row-sub{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+  .status-select{
+    font-family:var(--font-mono); font-size:11.5px; border-radius:100px; padding:5px 10px; border:1px solid var(--line);
+    background:var(--bg-void); color:var(--text-muted);
+  }
+  .priority-pill{font-family:var(--font-mono); font-size:10.5px; padding:3px 9px; border-radius:100px; white-space:nowrap;}
+  .priority-Low{color:var(--text-faint); background:var(--bg-panel-2); border:1px solid var(--line);}
+  .priority-Normal{color:var(--accent-2); background:var(--accent-dim); border:1px solid rgba(76,141,255,.3);}
+  .priority-High{color:var(--warn); background:var(--warn-dim); border:1px solid rgba(251,191,36,.3);}
+  .priority-Urgent{color:var(--danger); background:var(--danger-dim); border:1px solid rgba(248,113,113,.35);}
+  .admin-empty{padding:56px 20px; text-align:center; color:var(--text-faint); font-size:14px;}
+
+  /* detail drawer */
+  .drawer-overlay{position:fixed; inset:0; background:rgba(4,7,15,.6); backdrop-filter:blur(2px); z-index:100; display:none;}
+  .drawer-overlay.active{display:block;}
+  .drawer{
+    position:fixed; top:0; right:0; bottom:0; width:min(480px, 100vw); background:var(--bg-panel);
+    border-left:1px solid var(--line); z-index:101; transform:translateX(100%); transition:transform .25s ease;
+    display:flex; flex-direction:column;
+  }
+  .drawer.active{transform:translateX(0);}
+  .drawer-head{padding:20px 24px; border-bottom:1px solid var(--line-soft); display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
+  .drawer-close{color:var(--text-faint); font-size:20px; line-height:1; padding:4px 8px; border-radius:6px;}
+  .drawer-close:hover{color:var(--text); background:var(--bg-panel-2);}
+  .drawer-body{padding:22px 24px; overflow-y:auto; flex:1;}
+  .drawer-section{margin-bottom:22px;}
+  .drawer-label{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); margin-bottom:8px;}
+  .drawer-field-row{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
+  .drawer-field{background:var(--bg-void); border:1px solid var(--line-soft); border-radius:8px; padding:9px 12px;}
+  .drawer-field .k{font-size:10.5px; color:var(--text-faint); margin-bottom:3px;}
+  .drawer-field .v{font-size:13px;}
+  .drawer-desc{font-size:13.5px; color:var(--text-muted); background:var(--bg-void); border:1px solid var(--line-soft); border-radius:9px; padding:13px; line-height:1.6;}
+  .msg-thread{display:flex; flex-direction:column; gap:10px;}
+  .msg{border-radius:10px; padding:11px 13px; font-size:13px; max-width:92%;}
+  .msg-user{background:var(--bg-void); border:1px solid var(--line-soft); align-self:flex-start;}
+  .msg-admin{background:var(--accent-dim); border:1px solid rgba(76,141,255,.3); align-self:flex-end;}
+  .msg-system{background:transparent; border:1px dashed var(--line); color:var(--text-faint); font-family:var(--font-mono); font-size:11.5px; align-self:center; text-align:center;}
+  .msg-meta{font-size:10.5px; color:var(--text-faint); margin-bottom:4px;}
+  .reply-box{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
+  .reply-box textarea{background:var(--bg-void); border:1px solid var(--line); border-radius:9px; padding:11px 13px; color:var(--text); font-size:13.5px; min-height:70px; resize:vertical;}
+  .attachment-chip{display:inline-flex; align-items:center; gap:8px; background:var(--bg-void); border:1px solid var(--line-soft); border-radius:8px; padding:8px 12px; font-size:12.5px; color:var(--text-muted);}
+
+  /* users tab */
+  .users-table-wrap{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .admin-login{max-width:440px; margin:30px auto 90px; background:var(--bg-panel); border:1px solid var(--line); border-radius:16px; padding:30px;}
+  .admin-login h3{font-family:var(--font-display); font-size:22px; margin-bottom:8px;}
+  .admin-login p{color:var(--text-muted); font-size:13.5px; margin-bottom:22px;}
+  .admin-login-error{color:var(--danger); font-size:12px; margin-top:10px; display:none;}
+  .account-panel{background:var(--bg-panel); border:1px solid var(--line); border-radius:14px; padding:22px; margin:0 auto 24px; max-width:760px;}
+  .account-panel[hidden]{display:none;}
+  .account-head{display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:18px;}
+  .account-head h3{font-family:var(--font-display); font-size:18px;}
+  .account-actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .profile-menu{position:relative; display:none;}
+  .profile-trigger{display:flex; align-items:center; gap:9px; background:transparent; border:1px solid var(--line); color:var(--text); padding:6px 10px 6px 7px; border-radius:100px; font-size:13px; font-weight:600;}
+  .profile-trigger:hover{border-color:var(--accent); background:var(--bg-panel-2);}
+  .profile-avatar{width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-2),var(--accent)); color:#04070f; font-family:var(--font-mono); font-size:10px; font-weight:700;}
+  .profile-chevron{color:var(--text-faint); font-size:11px;}
+  .profile-dropdown{position:absolute; top:calc(100% + 9px); right:0; z-index:60; min-width:190px; padding:6px; background:var(--bg-panel); border:1px solid var(--line); border-radius:10px; box-shadow:0 16px 35px rgba(0,0,0,.4);}
+  .profile-dropdown[hidden]{display:none;}
+  .profile-dropdown a,.profile-dropdown button{display:block; width:100%; text-align:left; background:transparent; border:0; color:var(--text-muted); padding:9px 10px; border-radius:6px; font-size:13px;}
+  .profile-dropdown a:hover,.profile-dropdown button:hover{background:var(--bg-panel-2); color:var(--text);}
+  .profile-dropdown .menu-danger{color:var(--danger);}
+  .profile-divider{height:1px; background:var(--line-soft); margin:5px 4px;}
+  @media (max-width:560px){.profile-trigger .profile-name{display:none;}.profile-trigger{padding-right:7px;}.profile-dropdown{right:-4px;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+        <rect x="1" y="1" width="38" height="38" rx="9" fill="#111a2b" stroke="#4c8dff" stroke-width="1.4"/>
+        <circle cx="13" cy="14" r="2.4" fill="#7fb3ff"/>
+        <circle cx="27" cy="14" r="2.4" fill="#4c8dff"/>
+        <circle cx="20" cy="27" r="2.4" fill="#7fb3ff"/>
+        <path d="M13 14 L20 27 L27 14" stroke="#4c8dff" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">IT<b>Resolve</b></span>
+    </div>
+    <div class="nav-links">
+      <a href="#" onclick="showView('home');return false;" data-nav="home">Home</a>
+      <a href="#" onclick="showView('kb');return false;" data-nav="kb">Knowledge Base</a>
+      <a href="#" onclick="showView('submit');return false;" data-nav="submit">Submit Problem</a>
+      <a href="#" onclick="showView('tickets');return false;" data-nav="tickets">Track Ticket</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#" id="userLoginNav" class="btn btn-ghost btn-sm" onclick="showView('user-login');return false;" data-nav="user-login">User Login</a>
+      <a href="#" id="adminLoginNav" class="btn btn-ghost btn-sm" onclick="showView('admin');return false;" data-nav="admin">IT Staff Login</a>
+      <div class="profile-menu" id="userProfileMenu">
+        <button type="button" class="profile-trigger" aria-expanded="false" aria-controls="userProfileDropdown" onclick="toggleProfileMenu('user')"><span class="profile-avatar" id="userNavAvatar">U</span><span class="profile-name" id="userNavName">Account</span><span class="profile-chevron">&#9662;</span></button>
+        <div class="profile-dropdown" id="userProfileDropdown" hidden>
+          <a href="#" onclick="openUserProfile();return false;">Profile</a>
+          <a href="#" onclick="openUserProfile();return false;">Account Settings</a>
+          <a href="#" onclick="showView('forgot-password');return false;">Change Password</a>
+          <div class="profile-divider"></div>
+          <button type="button" class="menu-danger" onclick="logoutUser()">Logout</button>
+        </div>
+      </div>
+      <div class="profile-menu" id="adminProfileMenu">
+        <button type="button" class="profile-trigger" aria-expanded="false" aria-controls="adminProfileDropdown" onclick="toggleProfileMenu('admin')"><span class="profile-avatar" id="adminNavAvatar">IT</span><span class="profile-name" id="adminNavName">IT Staff</span><span class="profile-chevron">&#9662;</span></button>
+        <div class="profile-dropdown" id="adminProfileDropdown" hidden>
+          <a href="#" onclick="openAdminProfile();return false;">Profile</a>
+          <a href="#" onclick="openAdminProfile();return false;">Account Settings</a>
+          <a href="#" onclick="showView('admin-forgot-password');return false;">Change Password</a>
+          <a href="#" onclick="showView('admin');return false;">Admin Dashboard</a>
+          <a href="#" onclick="switchAdminTab('users');showView('admin');return false;">User Management</a>
+          <div class="profile-divider"></div>
+          <button type="button" class="menu-danger" onclick="logoutAdmin()">Logout</button>
+        </div>
+      </div>
+      <a href="#" class="btn btn-primary btn-sm" onclick="showView('submit');return false;">Submit Problem</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HOME VIEW ============ -->
+<div class="view active" id="view-home">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> SYSTEM STATUS: SPECIALISTS ONLINE</div>
+        <h1 class="hero-h">Having an IT problem?<span class="accent-line">Resolve it.</span></h1>
+        <p class="hero-sub">Describe your Windows, software, hardware, network, internet, or printer problem. Get troubleshooting guidance and request professional IT support when needed.</p>
+        <div class="hero-ctas">
+          <a href="#" class="btn btn-primary" onclick="showView('submit');return false;">Submit Your IT Problem</a>
+          <a href="#" class="btn btn-secondary" onclick="showView('kb');return false;">Browse Solutions</a>
+        </div>
+      </div>
+      <div class="scan-panel">
+        <div class="scan-head">
+          <div class="scan-dots"><span></span><span></span><span></span></div>
+          <div class="scan-title">diagnostic&nbsp;/&nbsp;live-intake</div>
+        </div>
+        <div class="scan-body">
+          <div class="scan-line"><b>Intake:</b> ready to accept problem description</div>
+          <div class="scan-readout">
+            <div class="spinner"></div>
+            <div>Scanning category: <span id="scanTarget">Windows &amp; Software</span><span class="cursor"></span></div>
+          </div>
+          <div class="scan-line"><b>Next:</b> troubleshooting steps generated on submit</div>
+          <div class="scan-meta">
+            <span>4 categories monitored</span>
+            <span class="ok">● queue clear</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="categories">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-tag">Support categories</div>
+        <h2 class="section-title">What's going wrong?</h2>
+        <p class="section-desc">Pick the closest match — it pre-fills your ticket so you spend less time describing and more time resolving.</p>
+      </div>
+      <div class="cat-grid">
+
+        <button class="cat-card" onclick="startTicket('Windows & Software')">
+          <div class="cat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="cat-name">Windows &amp; Software</div>
+          <div class="cat-desc">Windows errors, software installation, drivers, applications, configuration, and system troubleshooting.</div>
+          <div class="cat-arrow">Start diagnosis →</div>
+        </button>
+
+        <button class="cat-card" onclick="startTicket('Hardware & Peripherals')">
+          <div class="cat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="12" rx="1.5"/><path d="M8 21h8M9 18h6"/><circle cx="17" cy="8" r="1"/></svg>
+          </div>
+          <div class="cat-name">Hardware &amp; Peripherals</div>
+          <div class="cat-desc">Computer hardware, monitors, keyboards, mice, USB devices, storage, and other peripherals.</div>
+          <div class="cat-arrow">Start diagnosis →</div>
+        </button>
+
+        <button class="cat-card" onclick="startTicket('Network & Internet')">
+          <div class="cat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12a7 7 0 0114 0M8 15a4 4 0 018 0"/><circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <div class="cat-name">Network &amp; Internet</div>
+          <div class="cat-desc">Wi-Fi, LAN, internet connectivity, DNS, IP configuration, routers, and network troubleshooting.</div>
+          <div class="cat-arrow">Start diagnosis →</div>
+        </button>
+
+        <button class="cat-card" onclick="startTicket('Printer Support')">
+          <div class="cat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V4h12v5M6 18h12v-4H6v4zM4 9h16v6H4z"/></svg>
+          </div>
+          <div class="cat-name">Printer Support</div>
+          <div class="cat-desc">Printer installation, drivers, offline printers, network printers, printing errors, and troubleshooting.</div>
+          <div class="cat-arrow">Start diagnosis →</div>
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" style="background:var(--bg-panel); border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-tag">Process</div>
+        <h2 class="section-title">How ITResolve works</h2>
+        <p class="section-desc">Four steps from "something's broken" to "fixed" — guidance first, a human whenever you need one.</p>
+      </div>
+      <div class="steps">
+        <div class="steps-line"></div>
+        <div class="steps-grid">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-title">Describe your problem</div>
+            <div class="step-desc">Tell us what device or system you're having trouble with.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-title">Provide details</div>
+            <div class="step-desc">Add the error message, symptoms, screenshots, or other relevant information.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-title">Get troubleshooting guidance</div>
+            <div class="step-desc">Receive recommended troubleshooting steps based on your problem.</div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-title">Request IT support</div>
+            <div class="step-desc">If it's still not fixed, submit a support ticket or request professional assistance.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kb-preview">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-tag">Knowledge base</div>
+        <h2 class="section-title">Try a fix before you file a ticket</h2>
+        <p class="section-desc">Search troubleshooting articles across all four categories.</p>
+      </div>
+      <div class="kb-list">
+        <div class="kb-item"><div><div class="kb-item-title">Fixing a slow Windows computer</div><span class="kb-tag">WINDOWS &amp; SOFTWARE</span></div></div>
+        <div class="kb-item"><div><div class="kb-item-title">Troubleshooting a printer that's offline</div><span class="kb-tag">PRINTER SUPPORT</span></div></div>
+        <div class="kb-item"><div><div class="kb-item-title">Wi-Fi connected but no internet access</div><span class="kb-tag">NETWORK &amp; INTERNET</span></div></div>
+        <div class="kb-item"><div><div class="kb-item-title">USB devices not being recognized</div><span class="kb-tag">HARDWARE &amp; PERIPHERALS</span></div></div>
+      </div>
+      <div style="margin-top:26px;"><a href="#" class="btn btn-secondary" onclick="showView('kb');return false;">Browse full knowledge base →</a></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ KNOWLEDGE BASE VIEW ============ -->
+<div class="view" id="view-kb">
+  <div class="wrap page-head">
+    <div class="section-tag">Knowledge base</div>
+    <h2 class="section-title">Search troubleshooting articles</h2>
+    <p class="section-desc" style="margin-bottom:26px;">Find a fix yourself, or submit a ticket if you're still stuck.</p>
+  </div>
+  <div class="wrap" style="padding-bottom:80px;">
+    <div class="kb-search">
+      <input type="text" id="kbSearchInput" placeholder="Search e.g. 'printer offline', 'slow computer', 'no internet'…" oninput="renderKb()">
+      <button class="btn btn-primary btn-sm" onclick="renderKb()">Search</button>
+    </div>
+    <div class="kb-list" id="kbResults"></div>
+  </div>
+</div>
+
+<!-- ============ USER LOGIN VIEW ============ -->
+<div class="view" id="view-user-login">
+  <div class="admin-login">
+    <div class="section-tag">Customer access</div>
+    <h3>Sign in to your account</h3>
+    <p>Sign in to submit problems and track your support tickets.</p>
+    <form onsubmit="return userLogin(event)">
+      <div class="field" id="userNameField" style="display:none;"><label for="userName">Name</label><input type="text" id="userName" autocomplete="name"></div>
+      <div class="field"><label for="userEmail">Email</label><input type="email" id="userEmail" autocomplete="username" required></div>
+      <div class="field"><label for="userPassword">Password</label><input type="password" id="userPassword" autocomplete="current-password" required></div>
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      <button type="button" class="btn btn-secondary btn-block" style="margin-top:10px;" onclick="toggleRegistration()">Create account</button>
+      <div style="text-align:center; margin-top:12px;"><a href="#" style="font-size:13px; color:var(--accent-2);" onclick="showView('forgot-password');return false;">Forgot password?</a></div>
+      <div class="admin-login-error" id="userLoginError"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ FORGOT PASSWORD VIEW ============ -->
+<div class="view" id="view-forgot-password">
+  <div class="admin-login">
+    <div class="section-tag">Password recovery</div>
+    <h3>Reset your password</h3>
+    <p>Enter your email address and we'll send you a password reset link.</p>
+    <form onsubmit="return forgotPassword(event)">
+      <div class="field"><label for="forgotEmail">Email</label><input type="email" id="forgotEmail" autocomplete="email" required></div>
+      <button type="submit" class="btn btn-primary btn-block">Send reset link</button>
+      <button type="button" class="btn btn-secondary btn-block" style="margin-top:10px;" onclick="showView('user-login')">Back to sign in</button>
+      <div class="admin-login-error" id="forgotPasswordError"></div>
+      <div style="display:none; margin-top:16px; padding:12px; background:var(--good-dim); border:1px solid rgba(52,211,153,.35); border-radius:8px; color:var(--good);" id="forgotPasswordSuccess">
+        Check your email for the password reset link. It will expire in 1 hour.
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ RESET PASSWORD VIEW ============ -->
+<div class="view" id="view-reset-password">
+  <div class="admin-login">
+    <div class="section-tag">Password recovery</div>
+    <h3>Create a new password</h3>
+    <p>Enter your new password below.</p>
+    <form onsubmit="return resetPassword(event)">
+      <div class="field"><label for="resetPassword">New password</label><input type="password" id="resetPassword" placeholder="At least 8 characters" required></div>
+      <div class="field"><label for="resetPasswordConfirm">Confirm password</label><input type="password" id="resetPasswordConfirm" placeholder="Confirm your new password" required></div>
+      <button type="submit" class="btn btn-primary btn-block">Update password</button>
+      <div class="admin-login-error" id="resetPasswordError"></div>
+      <div style="display:none; margin-top:16px; padding:12px; background:var(--good-dim); border:1px solid rgba(52,211,153,.35); border-radius:8px; color:var(--good);" id="resetPasswordSuccess">
+        Your password has been updated. You can now sign in with your new password.
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ ADMIN FORGOT PASSWORD VIEW ============ -->
+<div class="view" id="view-admin-forgot-password">
+  <div class="admin-login">
+    <div class="section-tag">Password recovery</div>
+    <h3>Reset your password</h3>
+    <p>Enter your email address and we'll send you a password reset link.</p>
+    <form onsubmit="return adminForgotPassword(event)">
+      <div class="field"><label for="adminForgotEmail">Email</label><input type="email" id="adminForgotEmail" autocomplete="email" required></div>
+      <button type="submit" class="btn btn-primary btn-block">Send reset link</button>
+      <button type="button" class="btn btn-secondary btn-block" style="margin-top:10px;" onclick="showView('admin')">Back to sign in</button>
+      <div class="admin-login-error" id="adminForgotPasswordError"></div>
+      <div style="display:none; margin-top:16px; padding:12px; background:var(--good-dim); border:1px solid rgba(52,211,153,.35); border-radius:8px; color:var(--good);" id="adminForgotPasswordSuccess">
+        Check your email for the password reset link. It will expire in 1 hour.
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ ADMIN RESET PASSWORD VIEW ============ -->
+<div class="view" id="view-admin-reset-password">
+  <div class="admin-login">
+    <div class="section-tag">Password recovery</div>
+    <h3>Create a new password</h3>
+    <p>Enter your new password below.</p>
+    <form onsubmit="return adminResetPassword(event)">
+      <div class="field"><label for="adminResetPassword">New password</label><input type="password" id="adminResetPassword" placeholder="At least 8 characters" required></div>
+      <div class="field"><label for="adminResetPasswordConfirm">Confirm password</label><input type="password" id="adminResetPasswordConfirm" placeholder="Confirm your new password" required></div>
+      <button type="submit" class="btn btn-primary btn-block">Update password</button>
+      <div class="admin-login-error" id="adminResetPasswordError"></div>
+      <div style="display:none; margin-top:16px; padding:12px; background:var(--good-dim); border:1px solid rgba(52,211,153,.35); border-radius:8px; color:var(--good);" id="adminResetPasswordSuccess">
+        Your password has been updated. You can now sign in with your new password.
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SUBMIT PROBLEM VIEW ============ -->
+<div class="view" id="view-submit">
+  <div class="wrap page-head">
+    <div class="section-tag">New ticket</div>
+    <h2 class="section-title">Submit your IT problem</h2>
+    <p class="section-desc" style="margin-bottom:10px;">The more detail you give us, the faster we can diagnose it.</p>
+  </div>
+
+  <div class="wrap" style="padding-bottom:90px;">
+    <div class="form-shell" id="formShell">
+      <form id="problemForm" onsubmit="return submitProblem(event)" novalidate>
+
+        <fieldset>
+          <legend>The problem</legend>
+          <div class="form-row">
+            <div class="field" id="f-category">
+              <label>Problem category *</label>
+              <select id="category" required>
+                <option value="">Select a category</option>
+                <option>Windows & Software</option>
+                <option>Hardware & Peripherals</option>
+                <option>Network & Internet</option>
+                <option>Printer Support</option>
+              </select>
+              <span class="error-msg">Please select a category.</span>
+            </div>
+            <div class="field" id="f-title">
+              <label>Problem title *</label>
+              <input type="text" id="title" placeholder="e.g. Laptop won't connect to Wi-Fi" required>
+              <span class="error-msg">Please give your problem a short title.</span>
+            </div>
+          </div>
+          <div class="field" id="f-description">
+            <label>Detailed problem description *</label>
+            <textarea id="description" placeholder="What's happening? What have you tried? When does it occur?" required></textarea>
+            <span class="error-msg">Please describe the problem.</span>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Error message <span class="hint">(if any)</span></label>
+              <input type="text" id="errorMessage" placeholder="Paste the exact error text">
+            </div>
+            <div class="field">
+              <label>When did it start?</label>
+              <select id="whenStarted">
+                <option>Just now</option>
+                <option>Today</option>
+                <option>This week</option>
+                <option>Over a week ago</option>
+                <option>Not sure</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Troubleshooting already attempted</label>
+            <textarea id="attempted" placeholder="e.g. restarted the device, reinstalled drivers, ran Windows Update…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Your device</legend>
+          <div class="form-row">
+            <div class="field">
+              <label>Device type</label>
+              <select id="deviceType">
+                <option>Desktop</option>
+                <option>Laptop</option>
+                <option>Printer</option>
+                <option>Router / Network device</option>
+                <option>Peripheral (mouse, keyboard, monitor, etc.)</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Device brand / model</label>
+              <input type="text" id="deviceModel" placeholder="e.g. Dell XPS 13, HP LaserJet M110">
+            </div>
+          </div>
+          <div class="field">
+            <label>Operating system</label>
+            <select id="os">
+              <option>Windows 11</option>
+              <option>Windows 10</option>
+              <option>macOS</option>
+              <option>ChromeOS</option>
+              <option>Linux</option>
+              <option>Not applicable</option>
+              <option>Not sure</option>
+            </select>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Attachment</legend>
+          <div class="field">
+            <label>Upload screenshot or image <span class="hint">(optional)</span></label>
+            <label class="upload-box" for="screenshot" id="uploadBox">Click to choose a file, or drag one here — PNG, JPG up to 10MB</label>
+            <input type="file" id="screenshot" accept="image/*" style="display:none" onchange="handleFile(event)">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Preferred support type *</legend>
+          <div class="support-options" id="supportOptions">
+            <label class="support-opt" data-val="Troubleshooting Guide">
+              <div><input type="radio" name="supportType" value="Troubleshooting Guide" onchange="markSupport(this)"> <span class="support-opt-title">Troubleshooting Guide</span></div>
+              <span class="support-opt-desc">Step-by-step self-service instructions.</span>
+            </label>
+            <label class="support-opt" data-val="Remote Assistance">
+              <div><input type="radio" name="supportType" value="Remote Assistance" onchange="markSupport(this)"> <span class="support-opt-title">Remote Assistance</span></div>
+              <span class="support-opt-desc">A specialist connects remotely to help.</span>
+            </label>
+            <label class="support-opt" data-val="Professional IT Support">
+              <div><input type="radio" name="supportType" value="Professional IT Support" onchange="markSupport(this)"> <span class="support-opt-title">Professional IT Support</span></div>
+              <span class="support-opt-desc">Full ticket handled by a specialist.</span>
+            </label>
+          </div>
+          <span class="error-msg" id="supportError" style="margin-top:8px;">Please choose a preferred support type.</span>
+        </fieldset>
+
+        <div class="form-footer">
+          <span class="form-note">Prototype — tickets are stored in this browser session only.</span>
+          <button type="submit" class="btn btn-primary">Submit ticket</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="success-panel" id="successPanel" style="display:none;">
+      <div class="success-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h3 class="section-title" style="margin-bottom:6px;">Ticket submitted</h3>
+      <p class="section-desc">We've logged your problem and a specialist will review it shortly.</p>
+      <div class="ticket-id" id="newTicketId">ITR-2026-0001</div>
+      <div><span class="success-status"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--good);"></span> Open</span></div>
+      <div style="margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="#" class="btn btn-secondary" onclick="showView('tickets');return false;">Track this ticket</a>
+        <a href="#" class="btn btn-ghost" onclick="resetForm();return false;">Submit another problem</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TICKETS VIEW ============ -->
+<div class="view" id="view-tickets">
+  <div class="wrap page-head">
+    <div class="section-tag">Your tickets</div>
+    <h2 class="section-title">Track support tickets</h2>
+    <p class="section-desc" style="margin-bottom:26px;">Every problem you submit shows up here with a live status.</p>
+    <button class="btn btn-secondary btn-sm" type="button" onclick="toggleUserAccount()">Profile settings</button>
+  </div>
+  <div class="wrap" style="padding-bottom:90px;">
+    <div class="account-panel" id="userAccountPanel" hidden>
+      <div class="account-head"><h3>Profile settings</h3><button class="btn btn-ghost btn-sm" type="button" onclick="toggleUserAccount()">Close</button></div>
+      <form onsubmit="return saveUserProfile(event)">
+        <div class="form-row">
+          <div class="field"><label for="profileName">Name</label><input type="text" id="profileName" required></div>
+          <div class="field"><label for="profileEmail">Email</label><input type="email" id="profileEmail" disabled></div>
+        </div>
+        <div class="field"><label for="profilePhone">Phone</label><input type="text" id="profilePhone"></div>
+        <div class="account-actions"><button class="btn btn-primary btn-sm" type="submit">Save profile</button><button class="btn btn-ghost btn-sm" type="button" onclick="logoutUser()">Log out</button></div>
+        <div class="admin-login-error" id="profileError"></div>
+      </form>
+    </div>
+    <div class="ticket-list" id="ticketList"></div>
+  </div>
+</div>
+
+<!-- ============ ADMIN DASHBOARD VIEW ============ -->
+<div class="view" id="view-admin">
+  <div class="admin-login" id="adminLoginPanel">
+    <div class="section-tag">Restricted area</div>
+    <h3>IT staff sign in</h3>
+    <p>Use your ITResolve support account to access the dashboard.</p>
+    <form onsubmit="return adminLogin(event)">
+      <div class="field">
+        <label for="adminEmail">Email</label>
+        <input type="email" id="adminEmail" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      <div style="text-align:center; margin-top:12px;"><a href="#" style="font-size:13px; color:var(--accent-2);" onclick="showView('admin-forgot-password');return false;">Forgot password?</a></div>
+      <div class="admin-login-error" id="adminLoginError"></div>
+    </form>
+  </div>
+  <div class="wrap admin-shell">
+
+    <div class="admin-topbar">
+      <div>
+        <div class="admin-title">IT Support Dashboard</div>
+        <div class="admin-sub">All submitted problems across every category, live.</div>
+      </div>
+      <div class="account-actions"><div class="admin-whoami"><span class="avatar" id="adminAvatar">IT</span> <span id="adminWhoami">IT Support</span></div></div>
+    </div>
+
+    <div class="account-panel" id="adminAccountPanel" hidden>
+      <div class="account-head"><h3>Admin profile settings</h3><button class="btn btn-ghost btn-sm" type="button" onclick="toggleAdminAccount()">Close</button></div>
+      <form onsubmit="return saveAdminProfile(event)">
+        <div class="form-row">
+          <div class="field"><label for="adminProfileName">Name</label><input type="text" id="adminProfileName" required></div>
+          <div class="field"><label for="adminProfileEmail">Email</label><input type="email" id="adminProfileEmail" disabled></div>
+        </div>
+        <div class="field"><label for="adminProfileRole">Role</label><input type="text" id="adminProfileRole" disabled></div>
+        <div class="account-actions"><button class="btn btn-primary btn-sm" type="submit">Save profile</button></div>
+        <div class="admin-login-error" id="adminProfileError"></div>
+      </form>
+    </div>
+
+    <div class="stat-grid" id="adminStats"></div>
+
+    <div class="admin-tabs">
+      <div class="admin-tab active" data-tab="tickets" onclick="switchAdminTab('tickets')">Tickets</div>
+      <div class="admin-tab" data-tab="users" onclick="switchAdminTab('users')">Users</div>
+    </div>
+
+    <!-- Tickets tab -->
+    <div id="adminTab-tickets">
+      <div class="admin-toolbar">
+        <input type="text" id="adminSearch" placeholder="Search by ticket number, title, or requester…" oninput="renderAdminTickets()">
+        <select id="adminCategoryFilter" onchange="renderAdminTickets()">
+          <option value="">All categories</option>
+          <option>Windows & Software</option>
+          <option>Hardware & Peripherals</option>
+          <option>Network & Internet</option>
+          <option>Printer Support</option>
+        </select>
+        <select id="adminStatusFilter" onchange="renderAdminTickets()">
+          <option value="">All statuses</option>
+          <option>Open</option>
+          <option>Under Review</option>
+          <option>In Progress</option>
+          <option>Waiting for User</option>
+          <option>Resolved</option>
+          <option>Closed</option>
+        </select>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Requester</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="adminTicketRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Users tab -->
+    <div id="adminTab-users" style="display:none;">
+      <div class="admin-toolbar">
+        <input type="text" id="adminUserSearch" placeholder="Search users by name or email…" oninput="renderAdminUsers()">
+      </div>
+      <div class="users-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Tickets filed</th><th>Joined</th></tr>
+          </thead>
+          <tbody id="adminUserRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Ticket detail drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <div class="row-ticket-id" id="drawerTicketId">ITR-2026-0001</div>
+      <div class="admin-title" style="font-size:17px; margin-top:4px;" id="drawerTitle">Problem title</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+            <rect x="1" y="1" width="38" height="38" rx="9" fill="#111a2b" stroke="#4c8dff" stroke-width="1.4"/>
+            <circle cx="13" cy="14" r="2.4" fill="#7fb3ff"/><circle cx="27" cy="14" r="2.4" fill="#4c8dff"/><circle cx="20" cy="27" r="2.4" fill="#7fb3ff"/>
+            <path d="M13 14 L20 27 L27 14" stroke="#4c8dff" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="brand-name">IT<b>Resolve</b></span>
+        </div>
+        <p class="footer-tagline">Diagnose. Troubleshoot. Resolve.<br>Your IT problem. Our solution.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Categories</h4>
+        <a href="#" onclick="startTicket('Windows & Software');return false;">Windows &amp; Software</a>
+        <a href="#" onclick="startTicket('Hardware & Peripherals');return false;">Hardware &amp; Peripherals</a>
+        <a href="#" onclick="startTicket('Network & Internet');return false;">Network &amp; Internet</a>
+        <a href="#" onclick="startTicket('Printer Support');return false;">Printer Support</a>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="#" onclick="showView('kb');return false;">Knowledge Base</a>
+        <a href="#" onclick="showView('submit');return false;">Submit a Problem</a>
+        <a href="#" onclick="showView('tickets');return false;">Track a Ticket</a>
+        <a href="#" onclick="showView('admin');return false;">IT Support Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#" onclick="return false;">About</a>
+        <a href="#" onclick="return false;">Contact</a>
+        <a href="#" onclick="return false;">Privacy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 ITResolve. All rights reserved.</span>
+      <span>Secure IT support platform.</span>
+    </div>
+  </div>
+</footer>
+<?php ?>
+
+<script>
+  const API_URL = 'https://itresolve-backend-production.up.railway.app/api';
+  let adminToken = sessionStorage.getItem('itresolve_admin_token');
+  let userToken = sessionStorage.getItem('itresolve_user_token');
+  let apiCategories = [];
+
+  function getSavedAdmin(){
+    try { return JSON.parse(sessionStorage.getItem('itresolve_admin') || 'null'); }
+    catch { return null; }
+  }
+
+  function isAuthorizedAdmin(){
+    const admin = getSavedAdmin();
+    return Boolean(adminToken && admin && ['admin', 'it_staff'].includes(admin.role));
+  }
+
+  function renderProfileMenus(){
+    const user = JSON.parse(sessionStorage.getItem('itresolve_user') || 'null');
+    const admin = getSavedAdmin();
+    const userMenu = document.getElementById('userProfileMenu');
+    const adminMenu = document.getElementById('adminProfileMenu');
+    const userLoggedIn = Boolean(userToken && user);
+    const adminLoggedIn = isAuthorizedAdmin();
+    userMenu.style.display = userLoggedIn ? 'block' : 'none';
+    adminMenu.style.display = adminLoggedIn ? 'block' : 'none';
+    document.getElementById('userLoginNav').style.display = userLoggedIn ? 'none' : '';
+    document.getElementById('adminLoginNav').style.display = adminLoggedIn || userLoggedIn ? 'none' : '';
+    if(userLoggedIn){
+      document.getElementById('userNavName').textContent = user.name || 'Account';
+      document.getElementById('userNavAvatar').textContent = initials(user.name, 'U');
+    }
+    if(adminLoggedIn){
+      document.getElementById('adminNavName').textContent = admin.name || 'IT Staff';
+      document.getElementById('adminNavAvatar').textContent = initials(admin.name, 'IT');
+    }
+  }
+
+  function initials(name, fallback){
+    const value = String(name || '').trim();
+    return value ? value.split(/\s+/).map(part => part[0]).join('').slice(0,2).toUpperCase() : fallback;
+  }
+
+  function toggleProfileMenu(type){
+    const dropdown = document.getElementById(`${type}ProfileDropdown`);
+    const trigger = dropdown.previousElementSibling;
+    document.querySelectorAll('.profile-dropdown').forEach(menu => { if(menu !== dropdown) menu.hidden = true; });
+    dropdown.hidden = !dropdown.hidden;
+    trigger.setAttribute('aria-expanded', String(!dropdown.hidden));
+  }
+
+  function closeProfileMenus(){
+    document.querySelectorAll('.profile-dropdown').forEach(menu => { menu.hidden = true; });
+    document.querySelectorAll('.profile-trigger').forEach(trigger => trigger.setAttribute('aria-expanded', 'false'));
+  }
+
+  function openUserProfile(){
+    closeProfileMenus();
+    showView('tickets');
+    const panel = document.getElementById('userAccountPanel');
+    panel.hidden = false;
+    loadUserProfile();
+  }
+
+  function openAdminProfile(){
+    closeProfileMenus();
+    showView('admin');
+    const panel = document.getElementById('adminAccountPanel');
+    if(panel.hidden) toggleAdminAccount();
+  }
+
+  function apiRequest(path, options = {}, token = adminToken || userToken){
+    const headers = {...(options.headers || {})};
+    if(token) headers.Authorization = `Bearer ${token}`;
+    return fetch(`${API_URL}${path}`, {...options, headers})
+      .then(response => response.json().then(data => ({ok:response.ok, data})))
+      .then(result => {
+        if(!result.ok) throw new Error(result.data.error || 'API request failed.');
+        return result.data;
+      });
+  }
+
+  function userLogin(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('userLoginError');
+    errorEl.style.display = 'none';
+    apiRequest('/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:document.getElementById('userEmail').value.trim(), password:document.getElementById('userPassword').value})
+    }, null)
+      .then(result => {
+        userToken = result.token;
+        sessionStorage.setItem('itresolve_user_token', userToken);
+        sessionStorage.setItem('itresolve_user', JSON.stringify(result.user));
+        renderProfileMenus();
+        showView('submit');
+      })
+      .catch(error => { errorEl.textContent = error.message; errorEl.style.display = 'block'; });
+    return false;
+  }
+
+  function toggleRegistration(){
+    const nameField = document.getElementById('userNameField');
+    const registration = nameField.style.display === 'none';
+    nameField.style.display = registration ? 'flex' : 'none';
+    document.querySelector('#view-user-login form button[type="submit"]').textContent = registration ? 'Create account' : 'Sign in';
+    document.querySelector('#view-user-login form').onsubmit = registration ? userRegister : userLogin;
+  }
+
+  function userRegister(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('userLoginError');
+    errorEl.style.display = 'none';
+    apiRequest('/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:document.getElementById('userName').value.trim(), email:document.getElementById('userEmail').value.trim(), password:document.getElementById('userPassword').value})
+    }, null).then(result => {
+      userToken = result.token;
+      sessionStorage.setItem('itresolve_user_token', userToken);
+      sessionStorage.setItem('itresolve_user', JSON.stringify(result.user));
+      renderProfileMenus();
+      showView('submit');
+    }).catch(error => { errorEl.textContent = error.message; errorEl.style.display = 'block'; });
+    return false;
+  }
+
+  function forgotPassword(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('forgotPasswordError');
+    const successEl = document.getElementById('forgotPasswordSuccess');
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+    const email = document.getElementById('forgotEmail').value.trim();
+    apiRequest('/auth/forgot-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email})
+    }, null).then(result => {
+      successEl.style.display = 'block';
+      document.getElementById('forgotEmail').value = '';
+      if(result.devResetToken){
+        successEl.textContent = `Check your email for the password reset link. For testing: ${result.devResetToken}`;
+      }
+    }).catch(error => {
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+    });
+    return false;
+  }
+
+  function resetPassword(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('resetPasswordError');
+    const successEl = document.getElementById('resetPasswordSuccess');
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+    const newPassword = document.getElementById('resetPassword').value;
+    const confirm = document.getElementById('resetPasswordConfirm').value;
+    if(newPassword !== confirm){
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.style.display = 'block';
+      return false;
+    }
+    const token = sessionStorage.getItem('itresolve_reset_token');
+    if(!token){
+      errorEl.textContent = 'Invalid or expired reset token.';
+      errorEl.style.display = 'block';
+      return false;
+    }
+    apiRequest('/auth/reset-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token, newPassword})
+    }, null).then(result => {
+      successEl.style.display = 'block';
+      setTimeout(() => {
+        sessionStorage.removeItem('itresolve_reset_token');
+        showView('user-login');
+      }, 2000);
+    }).catch(error => {A
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+    });
+    return false;
+  }
+
+  function resetPasswordWithToken(token){
+    sessionStorage.setItem('itresolve_reset_token', token);
+    showView('reset-password');
+  }
+
+  function adminResetPasswordWithToken(token){
+    sessionStorage.setItem('itresolve_admin_reset_token', token);
+    showView('admin-reset-password');
+  }
+
+  function handleResetLink(){
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const resetType = params.get('reset');
+    if(!token) return;
+    if(resetType === 'admin') adminResetPasswordWithToken(token);
+    else if(resetType === 'user') resetPasswordWithToken(token);
+    else return;
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  function loadCategories(){
+    apiRequest('/categories', {}, null).then(result => {
+      apiCategories = result.categories || [];
+      const category = document.getElementById('category');
+      category.innerHTML = '<option value="">Select a category</option>' + apiCategories.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+    }).catch(() => {});
+  }
+
+  function adminLogin(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('adminLoginError');
+    errorEl.style.display = 'none';
+    fetch(`${API_URL}/auth/admin/login`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        email:document.getElementById('adminEmail').value.trim(),
+        password:document.getElementById('adminPassword').value
+      })
+    })
+      .then(response => response.json().then(data => ({ok:response.ok, data})))
+      .then(result => {
+        if(!result.ok) throw new Error(result.data.error || 'Invalid email or password.');
+        sessionStorage.setItem('itresolve_admin_token', result.data.token);
+        sessionStorage.setItem('itresolve_admin', JSON.stringify(result.data.admin));
+        adminToken = result.data.token;
+        renderProfileMenus();
+        showAdminDashboard(result.data.admin);
+      })
+      .catch(error => {
+        errorEl.textContent = error.message === 'Failed to fetch'
+          ? 'The API is unavailable. Start the Node backend on port 8080 first.'
+          : error.message;
+        errorEl.style.display = 'block';
+      });
+    return false;
+  }
+
+  function showAdminDashboard(admin){
+    document.getElementById('adminLoginPanel').style.display = 'none';
+    document.querySelector('#view-admin .admin-shell').style.display = 'block';
+    document.getElementById('adminAvatar').textContent = initials(admin.name, 'IT');
+    document.getElementById('adminWhoami').textContent = `${admin.name} · ${admin.role}`;
+    renderProfileMenus();
+    document.getElementById('adminProfileName').value = admin.name || '';
+    document.getElementById('adminProfileEmail').value = admin.email || '';
+    document.getElementById('adminProfileRole').value = admin.role || '';
+    renderAdminTickets();
+  }
+
+  function toggleUserAccount(){
+    const panel = document.getElementById('userAccountPanel');
+    panel.hidden = !panel.hidden;
+    if(!panel.hidden) loadUserProfile();
+  }
+
+  function loadUserProfile(){
+    if(!userToken) return showView('user-login');
+    apiRequest('/users/me', {}, userToken).then(result => {
+      document.getElementById('profileName').value = result.user.name || '';
+      document.getElementById('profileEmail').value = result.user.email || '';
+      document.getElementById('profilePhone').value = result.user.phone || '';
+    }).catch(error => { document.getElementById('profileError').textContent = error.message; document.getElementById('profileError').style.display = 'block'; });
+  }
+
+  function saveUserProfile(e){
+    e.preventDefault();
+    apiRequest('/users/me', {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:document.getElementById('profileName').value.trim(), phone:document.getElementById('profilePhone').value.trim()})
+    }, userToken).then(() => {
+      const user = JSON.parse(sessionStorage.getItem('itresolve_user') || '{}');
+      user.name = document.getElementById('profileName').value.trim();
+      sessionStorage.setItem('itresolve_user', JSON.stringify(user));
+      document.getElementById('profileError').style.display = 'none';
+    }).catch(error => { document.getElementById('profileError').textContent = error.message; document.getElementById('profileError').style.display = 'block'; });
+    return false;
+  }
+
+  function toggleAdminAccount(){
+    const panel = document.getElementById('adminAccountPanel');
+    panel.hidden = !panel.hidden;
+    if(!panel.hidden) apiRequest('/users/admin/me', {}, adminToken).then(result => {
+      document.getElementById('adminProfileName').value = result.admin.name || '';
+      document.getElementById('adminProfileEmail').value = result.admin.email || '';
+      document.getElementById('adminProfileRole').value = result.admin.role || '';
+    }).catch(error => { document.getElementById('adminProfileError').textContent = error.message; document.getElementById('adminProfileError').style.display = 'block'; });
+  }
+
+  function saveAdminProfile(e){
+    e.preventDefault();
+    apiRequest('/users/admin/me', {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:document.getElementById('adminProfileName').value.trim()})
+    }, adminToken).then(() => {
+      const admin = JSON.parse(sessionStorage.getItem('itresolve_admin') || '{}');
+      admin.name = document.getElementById('adminProfileName').value.trim();
+      sessionStorage.setItem('itresolve_admin', JSON.stringify(admin));
+      showAdminDashboard(admin);
+      document.getElementById('adminProfileError').style.display = 'none';
+    }).catch(error => { document.getElementById('adminProfileError').textContent = error.message; document.getElementById('adminProfileError').style.display = 'block'; });
+    return false;
+  }
+
+  function logoutUser(){
+    sessionStorage.removeItem('itresolve_user_token');
+    sessionStorage.removeItem('itresolve_user');
+    userToken = null;
+    document.getElementById('userAccountPanel').hidden = true;
+    renderProfileMenus();
+    showView('user-login');
+  }
+
+  function logoutAdmin(){
+    sessionStorage.removeItem('itresolve_admin_token');
+    sessionStorage.removeItem('itresolve_admin');
+    adminToken = null;
+    document.getElementById('adminAccountPanel').hidden = true;
+    renderProfileMenus();
+    showView('admin');
+  }
+
+  function renderAdminAccess(){
+    const savedAdmin = getSavedAdmin();
+    if(isAuthorizedAdmin()) showAdminDashboard(savedAdmin);
+    else {
+      document.getElementById('adminLoginPanel').style.display = 'block';
+      document.querySelector('#view-admin .admin-shell').style.display = 'none';
+    }
+  }
+
+  function adminForgotPassword(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('adminForgotPasswordError');
+    const successEl = document.getElementById('adminForgotPasswordSuccess');
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+    const email = document.getElementById('adminForgotEmail').value.trim();
+    apiRequest('/auth/admin/forgot-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email})
+    }, null).then(result => {
+      successEl.style.display = 'block';
+      document.getElementById('adminForgotEmail').value = '';
+      if(result.devResetToken){
+        successEl.textContent = `Check your email for the password reset link. For testing: ${result.devResetToken}`;
+      }
+    }).catch(error => {
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+    });
+    return false;
+  }
+
+  function adminResetPassword(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('adminResetPasswordError');
+    const successEl = document.getElementById('adminResetPasswordSuccess');
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+    const newPassword = document.getElementById('adminResetPassword').value;
+    const confirm = document.getElementById('adminResetPasswordConfirm').value;
+    if(newPassword !== confirm){
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.style.display = 'block';
+      return false;
+    }
+    const token = sessionStorage.getItem('itresolve_admin_reset_token');
+    if(!token){
+      errorEl.textContent = 'Invalid or expired reset token.';
+      errorEl.style.display = 'block';
+      return false;
+    }
+    apiRequest('/auth/admin/reset-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token, newPassword})
+    }, null).then(result => {
+      successEl.style.display = 'block';
+      setTimeout(() => {
+        sessionStorage.removeItem('itresolve_admin_reset_token');
+        showView('admin');
+      }, 2000);
+    }).catch(error => {
+      errorEl.textContent = error.message;
+      errorEl.style.display = 'block';
+    });
+    return false;
+  }
+
+  // ---------- view routing ----------
+  function showView(name){
+    const protectedAdminViews = ['admin', 'admin-forgot-password', 'admin-reset-password'];
+    if(name === 'reset-password' && !sessionStorage.getItem('itresolve_reset_token')){
+      return showView('user-login');
+    }
+    if(name === 'admin-reset-password' && !sessionStorage.getItem('itresolve_admin_reset_token')){
+      return showView('admin');
+    }
+    if(protectedAdminViews.includes(name) && userToken && !isAuthorizedAdmin()){
+      closeProfileMenus();
+      return showView('home');
+    }
+    if(protectedAdminViews.includes(name) && name !== 'admin-reset-password' && adminToken && !isAuthorizedAdmin()){
+      adminToken = null;
+      sessionStorage.removeItem('itresolve_admin_token');
+      sessionStorage.removeItem('itresolve_admin');
+      renderProfileMenus();
+      return showView('home');
+    }
+    closeProfileMenus();
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+name).classList.add('active');
+    document.querySelectorAll('.nav-links a').forEach(a=>a.classList.toggle('active', a.dataset.nav===name));
+    window.scrollTo({top:0, behavior:'instant'});
+    if(name==='kb') renderKb();
+    if(name==='tickets') renderTickets();
+    if(name==='admin') renderAdminAccess();
+  }
+
+  function startTicket(category){
+    showView('submit');
+    document.getElementById('category').value = apiCategories.find(item => item.name === category)?.id || category;
+  }
+
+  // ---------- scan readout ----------
+  const scanCats = ['Windows & Software','Hardware & Peripherals','Network & Internet','Printer Support'];
+  let scanIdx = 0;
+  setInterval(()=>{
+    scanIdx = (scanIdx+1) % scanCats.length;
+    document.getElementById('scanTarget').textContent = scanCats[scanIdx];
+  }, 2200);
+
+  // ---------- knowledge base ----------
+  const kbArticles = [
+    {title:"How to fix a slow Windows computer", cat:"Windows & Software"},
+    {title:"Common Windows Update problems, solved", cat:"Windows & Software"},
+    {title:"Reinstalling a stubborn driver safely", cat:"Windows & Software"},
+    {title:"Troubleshooting a printer that is offline", cat:"Printer Support"},
+    {title:"Setting up a network printer from scratch", cat:"Printer Support"},
+    {title:"Clearing a stuck print queue", cat:"Printer Support"},
+    {title:"Wi-Fi connected but no internet access", cat:"Network & Internet"},
+    {title:"Diagnosing slow or dropping Wi-Fi", cat:"Network & Internet"},
+    {title:"Fixing DNS and IP configuration issues", cat:"Network & Internet"},
+    {title:"USB devices not recognized — quick fixes", cat:"Hardware & Peripherals"},
+    {title:"External monitor not detected", cat:"Hardware & Peripherals"},
+    {title:"Diagnosing a keyboard or mouse that stopped responding", cat:"Hardware & Peripherals"},
+  ];
+
+  function renderKb(){
+    const q = (document.getElementById('kbSearchInput')?.value || '').toLowerCase();
+    const el = document.getElementById('kbResults');
+    apiRequest(`/kb?q=${encodeURIComponent(q)}`, {}, null).then(result => {
+      const results = (result.articles || []).map(article => ({title:article.title, cat:article.category_name}));
+      if(results.length === 0){
+        el.innerHTML = '<div class="kb-empty" style="grid-column:1/-1;">No articles match that search. Try a different term, or submit a ticket.</div>';
+        return;
+      }
+      el.innerHTML = results.map(a => `
+      <div class="kb-item">
+        <div>
+          <div class="kb-item-title">${a.title}</div>
+          <span class="kb-tag">${a.cat.toUpperCase()}</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="startTicket('${a.cat}')">Still stuck →</button>
+      </div>
+      `).join('');
+    }).catch(() => {
+      el.innerHTML = '<div class="kb-empty" style="grid-column:1/-1;">The knowledge base API is unavailable.</div>';
+    });
+  }
+
+  // ---------- support type highlight ----------
+  function markSupport(input){
+    document.querySelectorAll('.support-opt').forEach(o=>o.classList.remove('checked'));
+    input.closest('.support-opt').classList.add('checked');
+    document.getElementById('supportError').style.display = 'none';
+  }
+
+  function handleFile(e){
+    const box = document.getElementById('uploadBox');
+    if(e.target.files.length){
+      box.textContent = '📎 ' + e.target.files[0].name + ' — click to change';
+    }
+  }
+
+  // ---------- ticket state ----------
+  let ticketCounter = 6;
+  const today = new Date();
+  const daysAgo = n => { const d = new Date(today); d.setDate(d.getDate()-n); return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); };
+
+  // Seed data so the tracking page and admin dashboard aren't empty on load.
+  // New tickets submitted through the form are added on top of this.
+  const tickets = [
+    {
+      id:'ITR-2026-0005', title:'Laptop won\'t connect to office Wi-Fi', category:'Network & Internet',
+      status:'In Progress', priority:'High', supportType:'Remote Assistance', date:daysAgo(0),
+      user_name:'Maria Santos', user_email:'maria.santos@example.com', deviceType:'Laptop', deviceModel:'Dell XPS 13',
+      os:'Windows 11', errorMessage:'"Can\'t connect to this network"', attempted:'Restarted laptop and router.',
+      whenStarted:'Today', attachment:'wifi-error.png',
+      messages:[
+        {sender:'system', text:'Ticket created.', date:daysAgo(0)},
+        {sender:'user', text:'It connects to my phone hotspot fine, just not the office Wi-Fi.', date:daysAgo(0)},
+        {sender:'admin', text:'Thanks Maria — can you confirm which Wi-Fi band you\'re selecting, 2.4GHz or 5GHz?', date:daysAgo(0)}
+      ]
+    },
+    {
+      id:'ITR-2026-0004', title:'HP LaserJet showing offline', category:'Printer Support',
+      status:'Waiting for User', priority:'Normal', supportType:'Troubleshooting Guide', date:daysAgo(1),
+      user_name:'Devon Clarke', user_email:'devon.clarke@example.com', deviceType:'Printer', deviceModel:'HP LaserJet M110',
+      os:'Windows 10', errorMessage:'Printer status: Offline', attempted:'Restarted the printer.',
+      whenStarted:'Yesterday', attachment:null,
+      messages:[
+        {sender:'system', text:'Ticket created.', date:daysAgo(1)},
+        {sender:'admin', text:'Please clear the print spooler and try again, then let us know.', date:daysAgo(1)}
+      ]
+    },
+    {
+      id:'ITR-2026-0003', title:'Excel crashes on large spreadsheets', category:'Windows & Software',
+      status:'Open', priority:'Normal', supportType:'Professional IT Support', date:daysAgo(1),
+      user_name:'Priya Patel', user_email:'priya.patel@example.com', deviceType:'Desktop', deviceModel:'HP EliteDesk 800',
+      os:'Windows 11', errorMessage:'Excel has stopped working', attempted:'Reinstalled Office.',
+      whenStarted:'This week', attachment:'excel-crash.png',
+      messages:[{sender:'system', text:'Ticket created.', date:daysAgo(1)}]
+    },
+    {
+      id:'ITR-2026-0002', title:'Second monitor not detected', category:'Hardware & Peripherals',
+      status:'Resolved', priority:'Low', supportType:'Troubleshooting Guide', date:daysAgo(3),
+      user_name:'Sam Ora', user_email:'sam.ora@example.com', deviceType:'Laptop', deviceModel:'Lenovo ThinkPad X1',
+      os:'Windows 11', errorMessage:'', attempted:'Swapped HDMI cable.',
+      whenStarted:'Over a week ago', attachment:null,
+      messages:[
+        {sender:'system', text:'Ticket created.', date:daysAgo(3)},
+        {sender:'admin', text:'This was a display driver issue — updated and confirmed working.', date:daysAgo(2)},
+        {sender:'system', text:'Status changed to "Resolved".', date:daysAgo(2)}
+      ]
+    },
+    {
+      id:'ITR-2026-0001', title:'Windows Update stuck at 42%', category:'Windows & Software',
+      status:'Closed', priority:'Normal', supportType:'Remote Assistance', date:daysAgo(5),
+      user_name:'Alan Reyes', user_email:'alan.reyes@example.com', deviceType:'Desktop', deviceModel:'Custom build',
+      os:'Windows 10', errorMessage:'Update stuck for 3 hours', attempted:'Waited overnight.',
+      whenStarted:'Over a week ago', attachment:null,
+      messages:[
+        {sender:'system', text:'Ticket created.', date:daysAgo(5)},
+        {sender:'admin', text:'Cleared the SoftwareDistribution cache remotely and update completed.', date:daysAgo(4)},
+        {sender:'system', text:'Status changed to "Closed".', date:daysAgo(4)}
+      ]
+    }
+  ];
+
+  function pad(n){ return String(n).padStart(4,'0'); }
+
+  function submitProblem(e){
+    e.preventDefault();
+    let valid = true;
+    const requiredFields = ['category','title','description'];
+    requiredFields.forEach(id=>{
+      const el = document.getElementById(id);
+      const wrap = document.getElementById('f-'+id);
+      if(!el.value.trim()){
+        valid = false;
+        wrap.classList.add('field-invalid');
+        el.classList.add('field-error');
+      } else {
+        wrap.classList.remove('field-invalid');
+        el.classList.remove('field-error');
+      }
+    });
+    const supportType = document.querySelector('input[name="supportType"]:checked');
+    if(!supportType){
+      valid = false;
+      document.getElementById('supportError').style.display = 'block';
+    }
+    if(!valid) return false;
+
+    if(!userToken){
+      showView('user-login');
+      document.getElementById('userLoginError').textContent = 'Please sign in before submitting a ticket.';
+      document.getElementById('userLoginError').style.display = 'block';
+      return false;
+    }
+
+    const fileInput = document.getElementById('screenshot');
+    const formData = new FormData();
+    formData.append('categoryId', document.getElementById('category').value);
+    formData.append('title', document.getElementById('title').value.trim());
+    formData.append('description', document.getElementById('description').value.trim());
+    formData.append('supportType', supportType.value);
+    formData.append('errorMessage', document.getElementById('errorMessage').value.trim());
+    formData.append('whenStarted', document.getElementById('whenStarted').value);
+    formData.append('troubleshootingAttempted', document.getElementById('attempted').value.trim());
+    formData.append('deviceType', document.getElementById('deviceType').value);
+    formData.append('deviceModel', document.getElementById('deviceModel').value.trim());
+    formData.append('operatingSystem', document.getElementById('os').value);
+    if(fileInput.files.length) formData.append('screenshot', fileInput.files[0]);
+    apiRequest('/tickets', {method:'POST', body:formData}, userToken).then(result => {
+      document.getElementById('newTicketId').textContent = result.ticket.ticketNumber;
+      document.getElementById('formShell').style.display = 'none';
+      document.getElementById('successPanel').style.display = 'block';
+    }).catch(error => alert(error.message));
+    return false;
+  }
+
+  function resetForm(){
+    document.getElementById('problemForm').reset();
+    document.querySelectorAll('.field-invalid').forEach(f=>f.classList.remove('field-invalid'));
+    document.querySelectorAll('.field-error').forEach(f=>f.classList.remove('field-error'));
+    document.querySelectorAll('.support-opt').forEach(o=>o.classList.remove('checked'));
+    document.getElementById('uploadBox').textContent = 'Click to choose a file, or drag one here — PNG, JPG up to 10MB';
+    document.getElementById('formShell').style.display = 'block';
+    document.getElementById('successPanel').style.display = 'none';
+  }
+
+  function statusClass(status){
+    if(status === 'Resolved' || status === 'Closed') return 'status-resolved';
+    if(status === 'In Progress' || status === 'Under Review') return 'status-progress';
+    return 'status-open';
+  }
+
+  function renderTickets(){
+    if(!userToken){
+      document.getElementById('ticketList').innerHTML = '<div class="empty-state"><p>Sign in to view your tickets.</p><a href="#" class="btn btn-primary" onclick="showView(\'user-login\');return false;">User Login</a></div>';
+      return;
+    }
+    apiRequest('/tickets', {}, userToken).then(result => {
+      tickets.length = 0;
+      (result.tickets || []).forEach(ticket => tickets.push({
+        id:ticket.ticket_number, databaseId:ticket.id, title:ticket.title, category:ticket.category_name,
+        status:ticket.status, priority:ticket.priority, supportType:ticket.support_type,
+        date:ticket.updated_at || ticket.created_at, user_name:ticket.user_name, user_email:ticket.user_email,
+        messages:[]
+      }));
+      renderTicketList();
+    }).catch(error => { document.getElementById('ticketList').innerHTML = `<div class="empty-state"><p>${error.message}</p></div>`; });
+  }
+
+  function renderTicketList(){
+    const el = document.getElementById('ticketList');
+    const myTickets = tickets;
+    if(myTickets.length === 0){
+      el.innerHTML = `
+        <div class="empty-state">
+          <p>No tickets yet. Submit an IT problem to get a ticket number and start tracking it here.</p>
+          <a href="#" class="btn btn-primary" onclick="showView('submit');return false;">Submit Your IT Problem</a>
+        </div>`;
+      return;
+    }
+    el.innerHTML = myTickets.map(t => `
+      <div class="ticket-row">
+        <div class="ticket-left">
+          <span class="ticket-id-sm">${t.id}</span>
+          <div>
+            <div class="ticket-title">${t.title}</div>
+            <div class="ticket-meta">${t.category} · ${t.supportType} · ${t.date}</div>
+          </div>
+        </div>
+        <span class="status-badge ${statusClass(t.status)}"><span class="dot"></span>${t.status}</span>
+      </div>
+    `).join('');
+  }
+
+  // ============ ADMIN DASHBOARD ============
+  function switchAdminTab(tab){
+    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+    document.getElementById('adminTab-tickets').style.display = tab==='tickets' ? 'block' : 'none';
+    document.getElementById('adminTab-users').style.display = tab==='users' ? 'block' : 'none';
+    if(tab==='users') renderAdminUsers();
+  }
+
+  function renderAdminStats(){
+    const open = tickets.filter(t=>t.status==='Open').length;
+    const progress = tickets.filter(t=>['In Progress','Under Review','Waiting for User'].includes(t.status)).length;
+    const resolvedToday = tickets.filter(t=>(t.status==='Resolved'||t.status==='Closed') && t.date===daysAgo(0)).length;
+    document.getElementById('adminStats').innerHTML = `
+      <div class="stat-card accent-open"><div class="stat-num">${open}</div><div class="stat-label">Open</div></div>
+      <div class="stat-card accent-progress"><div class="stat-num">${progress}</div><div class="stat-label">In progress</div></div>
+      <div class="stat-card accent-resolved"><div class="stat-num">${resolvedToday}</div><div class="stat-label">Resolved today</div></div>
+      <div class="stat-card"><div class="stat-num">${tickets.length}</div><div class="stat-label">Total tickets</div></div>
+    `;
+  }
+
+  function renderAdminTickets(){
+    if(!adminToken) return;
+    const params = new URLSearchParams({pageSize:'100'});
+    const search = document.getElementById('adminSearch')?.value || '';
+    const category = document.getElementById('adminCategoryFilter')?.value || '';
+    const status = document.getElementById('adminStatusFilter')?.value || '';
+    if(search) params.set('search', search);
+    if(status) params.set('status', status);
+    if(category) params.set('categoryId', apiCategories.find(item => item.name === category)?.id || '');
+    apiRequest(`/tickets?${params.toString()}`, {}, adminToken).then(result => {
+      tickets.length = 0;
+      (result.tickets || []).forEach(ticket => tickets.push({
+        id:ticket.ticket_number, databaseId:ticket.id, title:ticket.title, category:ticket.category_name,
+        status:ticket.status, priority:ticket.priority, supportType:ticket.support_type,
+        date:ticket.updated_at || ticket.created_at, user_name:ticket.user_name, user_email:ticket.user_email, messages:[]
+      }));
+      renderAdminTicketTable();
+    }).catch(error => { document.getElementById('adminTicketRows').innerHTML = `<tr><td colspan="6"><div class="admin-empty">${error.message}</div></td></tr>`; });
+  }
+
+  function renderAdminTicketTable(){
+    renderAdminStats();
+    const q = (document.getElementById('adminSearch')?.value || '').toLowerCase();
+    const cat = document.getElementById('adminCategoryFilter')?.value || '';
+    const status = document.getElementById('adminStatusFilter')?.value || '';
+
+    const filtered = tickets.filter(t=>{
+      const matchesQ = !q || t.id.toLowerCase().includes(q) || t.title.toLowerCase().includes(q) || t.user_name.toLowerCase().includes(q);
+      const matchesCat = !cat || t.category === cat;
+      const matchesStatus = !status || t.status === status;
+      return matchesQ && matchesCat && matchesStatus;
+    });
+
+    const body = document.getElementById('adminTicketRows');
+    if(filtered.length === 0){
+      body.innerHTML = `<tr><td colspan="6"><div class="admin-empty">No tickets match those filters.</div></td></tr>`;
+      return;
+    }
+
+    const statuses = ['Open','Under Review','In Progress','Waiting for User','Resolved','Closed'];
+    body.innerHTML = filtered.map(t => `
+      <tr class="admin-row" onclick="openDrawer('${t.id}')">
+        <td>
+          <div class="row-ticket-id">${t.id}</div>
+          <div class="row-title">${t.title}</div>
+        </td>
+        <td>
+          <div>${t.user_name}</div>
+          <div class="row-sub">${t.user_email}</div>
+        </td>
+        <td>${t.category}</td>
+        <td><span class="priority-pill priority-${t.priority}">${t.priority}</span></td>
+        <td onclick="event.stopPropagation()">
+          <select class="status-select" onchange="updateTicketStatus('${t.id}', this.value)">
+            ${statuses.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td class="row-sub">${t.date}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderAdminUsers(){
+    if(!adminToken) return;
+    const q = document.getElementById('adminUserSearch')?.value || '';
+    apiRequest(`/users?search=${encodeURIComponent(q)}`, {}, adminToken).then(result => {
+      const body = document.getElementById('adminUserRows');
+      const users = result.users || [];
+      if(!users.length){ body.innerHTML = '<tr><td colspan="4"><div class="admin-empty">No users found.</div></td></tr>'; return; }
+      body.innerHTML = users.map(user => `<tr><td class="row-title">${user.name}</td><td class="row-sub">${user.email}</td><td>${user.ticket_count}</td><td class="row-sub">${user.created_at}</td></tr>`).join('');
+    }).catch(error => { document.getElementById('adminUserRows').innerHTML = `<tr><td colspan="4"><div class="admin-empty">${error.message}</div></td></tr>`; });
+  }
+
+  function renderAdminUsersLocal(){
+    const q = (document.getElementById('adminUserSearch')?.value || '').toLowerCase();
+    const byEmail = {};
+    tickets.forEach(t=>{
+      if(!byEmail[t.user_email]) byEmail[t.user_email] = {name:t.user_name, email:t.user_email, count:0, joined:t.date};
+      byEmail[t.user_email].count++;
+    });
+    const users = Object.values(byEmail).filter(u =>
+      !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+    const body = document.getElementById('adminUserRows');
+    if(users.length === 0){
+      body.innerHTML = `<tr><td colspan="4"><div class="admin-empty">No users match that search.</div></td></tr>`;
+      return;
+    }
+    body.innerHTML = users.map(u => `
+      <tr>
+        <td class="row-title">${u.name}</td>
+        <td class="row-sub">${u.email}</td>
+        <td>${u.count}</td>
+        <td class="row-sub">${u.joined}</td>
+      </tr>
+    `).join('');
+  }
+
+  function updateTicketStatus(ticketId, newStatus){
+    const t = tickets.find(x=>x.id===ticketId);
+    if(!t) return;
+    apiRequest(`/tickets/${t.databaseId || ticketId}/status`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:newStatus})
+    }, adminToken).then(() => {
+      t.status = newStatus;
+      renderAdminTickets();
+      if(document.getElementById('drawer').classList.contains('active')) openDrawer(ticketId);
+    }).catch(error => alert(error.message));
+  }
+
+  function openDrawer(ticketId){
+    const t = tickets.find(x=>x.id===ticketId);
+    if(!t) return;
+    document.getElementById('drawerTicketId').textContent = t.id;
+    document.getElementById('drawerTitle').textContent = t.title;
+
+    const statuses = ['Open','Under Review','In Progress','Waiting for User','Resolved','Closed'];
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="drawer-section">
+        <div class="drawer-label">Requester</div>
+        <div class="drawer-desc">${t.user_name} · ${t.user_email}</div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-label">Status</div>
+        <select class="status-select" style="width:100%; padding:9px 12px;" onchange="updateTicketStatus('${t.id}', this.value)">
+          ${statuses.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-label">Device &amp; category</div>
+        <div class="drawer-field-row">
+          <div class="drawer-field"><div class="k">Category</div><div class="v">${t.category}</div></div>
+          <div class="drawer-field"><div class="k">Support type</div><div class="v">${t.supportType}</div></div>
+          <div class="drawer-field"><div class="k">Device</div><div class="v">${t.deviceType||'—'} ${t.deviceModel?('· '+t.deviceModel):''}</div></div>
+          <div class="drawer-field"><div class="k">OS</div><div class="v">${t.os||'—'}</div></div>
+        </div>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-label">Description</div>
+        <div class="drawer-desc">${t.description || t.title}${t.errorMessage ? `<br><br><b>Error:</b> ${t.errorMessage}` : ''}</div>
+      </div>
+      ${t.attempted ? `
+      <div class="drawer-section">
+        <div class="drawer-label">Already attempted</div>
+        <div class="drawer-desc">${t.attempted}</div>
+      </div>` : ''}
+      ${t.attachment ? `
+      <div class="drawer-section">
+        <div class="drawer-label">Attachment</div>
+        <div class="attachment-chip">🖼️ ${t.attachment}</div>
+      </div>` : ''}
+      <div class="drawer-section">
+        <div class="drawer-label">Conversation</div>
+        <div class="msg-thread" id="drawerThread">
+          ${t.messages.map(m => m.sender==='system'
+            ? `<div class="msg msg-system">${m.text} · ${m.date}</div>`
+            : `<div class="msg msg-${m.sender}"><div class="msg-meta">${m.sender==='admin'?'IT Support':t.user_name} · ${m.date}</div>${m.text}</div>`
+          ).join('')}
+        </div>
+        <div class="reply-box">
+          <textarea id="replyText" placeholder="Reply to ${t.user_name}…"></textarea>
+          <button class="btn btn-primary btn-sm" onclick="sendReply('${t.id}')">Send reply</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('drawer').classList.add('active');
+    document.getElementById('drawerOverlay').classList.add('active');
+  }
+
+  function closeDrawer(){
+    document.getElementById('drawer').classList.remove('active');
+    document.getElementById('drawerOverlay').classList.remove('active');
+  }
+
+  function sendReply(ticketId){
+    const box = document.getElementById('replyText');
+    const text = box.value.trim();
+    if(!text) return;
+    const t = tickets.find(x=>x.id===ticketId);
+    apiRequest(`/tickets/${t.databaseId || ticketId}/messages`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:text})
+    }, adminToken).then(() => {
+      box.value = '';
+      openDrawer(ticketId);
+      renderAdminTickets();
+    }).catch(error => alert(error.message));
+  }
+
+  loadCategories();
+  renderKb();
+  renderProfileMenus();
+  handleResetLink();
+</script>
+</body>
+</html>

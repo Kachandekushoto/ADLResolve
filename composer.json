@@ -1,0 +1,10 @@
+{
+  "name": "itresolve/backend",
+  "description": "ITResolve PHP mail integration",
+  "type": "project",
+  "require": {
+    "phpmailer/phpmailer": "^7.1",
+    "league/oauth2-google": "^4.0"
+  },
+  "license": "proprietary"
+}
