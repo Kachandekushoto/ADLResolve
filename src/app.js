@@ -15,10 +15,11 @@ const kbRoutes = require('./routes/kb.routes');
 const userRoutes = require('./routes/users.routes');
 
 const app = express();
-const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost,http://localhost:8080')
+const configuredOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost,http://localhost:8080')
 	.split(',')
 	.map(origin => origin.trim())
 	.filter(Boolean);
+const allowedOrigins = [...new Set([...configuredOrigins, 'https://adlresolve.netlify.app'])];
 
 app.use(helmet());
 app.use(cors({
