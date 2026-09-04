@@ -18,7 +18,12 @@ function createTransporter() {
 }
 
 async function sendPasswordResetEmail({ to, name, token, isAdmin = false }) {
-  if (!isMailConfigured()) return false;
+  if (!isMailConfigured()) {
+    const error = new Error('Password reset email is not configured. Add GMAIL_USER and GMAIL_APP_PASSWORD to the production environment.');
+    error.publicMessage = 'Password reset email is temporarily unavailable. Please contact support.';
+    error.status = 503;
+    throw error;
+  }
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost/itresolve-backend/index.php';
   const resetUrlObject = new URL(frontendUrl);
